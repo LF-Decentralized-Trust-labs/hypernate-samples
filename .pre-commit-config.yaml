@@ -1,0 +1,18 @@
+---
+repos:
+  - repo: local
+    hooks:
+      - id: spotless-asset-transfer-basic
+        name: Spotless (asset-transfer-basic)
+        entry: asset-transfer-basic/gradlew
+        args: [-p, asset-transfer-basic, spotlessCheck]
+        language: system
+        pass_filenames: false
+        files: asset-transfer-basic/.*\.(java|kt|kts)$
+      - id: spotless-asset-transfer-demo
+        name: Spotless (asset-transfer-demo)
+        entry: asset-transfer-demo/gradlew
+        args: [-p, asset-transfer-demo, spotlessCheck]
+        language: system
+        pass_filenames: false
+        files: asset-transfer-demo/.*\.(java|kt|kts)$
