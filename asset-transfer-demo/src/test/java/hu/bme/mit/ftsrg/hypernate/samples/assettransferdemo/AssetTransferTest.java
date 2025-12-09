@@ -8,8 +8,8 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import hu.bme.mit.ftsrg.chaincode.testutil.ContractTesting;
 import hu.bme.mit.ftsrg.chaincode.testutil.util.Serializer;
+import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import java.util.List;
-import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -26,7 +26,7 @@ final class AssetTransferTest {
 
   private ContractTesting testing;
   private AssetTransfer contract;
-  private Context ctx;
+  private HypernateContext ctx;
   @Mock private ChaincodeStub stub;
 
   @BeforeEach
@@ -34,7 +34,7 @@ final class AssetTransferTest {
     testing = new ContractTesting(Serializer::serialize, obj -> serialize(obj).getBytes(UTF_8));
     testing.arrange(stub).identities.setTestAdminCreator();
     contract = new AssetTransfer();
-    ctx = contract.createContext(stub);
+    ctx = (HypernateContext) contract.createContext(stub);
   }
 
   @Test

@@ -2,11 +2,14 @@
 package hu.bme.mit.ftsrg.hypernate.samples.assettransferdemo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
+import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import java.util.Objects;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
 @DataType
+@PrimaryKey(@AttributeInfo(name = "assetID"))
 public final class Asset {
 
   @Property private final String assetID;

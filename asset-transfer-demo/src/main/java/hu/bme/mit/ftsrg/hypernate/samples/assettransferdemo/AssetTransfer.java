@@ -7,8 +7,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
+import hu.bme.mit.ftsrg.hypernate.contract.HypernateContract;
 import org.hyperledger.fabric.contract.Context;
-import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.Contact;
 import org.hyperledger.fabric.contract.annotation.Contract;
 import org.hyperledger.fabric.contract.annotation.Default;
@@ -35,7 +36,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
                     name = "Adrian Transfer",
                     url = "https://hyperledger.example.com")))
 @Default
-public final class AssetTransfer implements ContractInterface {
+public final class AssetTransfer implements HypernateContract {
 
   private final ObjectMapper mapper =
       JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
@@ -51,13 +52,14 @@ public final class AssetTransfer implements ContractInterface {
    * @param ctx the transaction context
    */
   @Transaction(intent = Transaction.TYPE.SUBMIT)
-  public void InitLedger(final Context ctx) {
-    putAsset(ctx, new Asset("asset1", "blue", 5, "Tomoko", 300));
-    putAsset(ctx, new Asset("asset2", "red", 5, "Brad", 400));
-    putAsset(ctx, new Asset("asset3", "green", 10, "Jin Soo", 500));
-    putAsset(ctx, new Asset("asset4", "yellow", 10, "Max", 600));
-    putAsset(ctx, new Asset("asset5", "black", 15, "Adrian", 700));
-    putAsset(ctx, new Asset("asset6", "white", 15, "Michel", 700));
+  public void InitLedger(final HypernateContext ctx) {
+    var registry = ctx.getRegistry();
+    registry.tryCreate(new Asset("asset1", "blue", 5, "Tomoko", 300));
+    registry.tryCreate(new Asset("asset2", "red", 5, "Brad", 400));
+    registry.tryCreate(new Asset("asset3", "green", 10, "Jin Soo", 500));
+    registry.tryCreate(new Asset("asset4", "yellow", 10, "Max", 600));
+    registry.tryCreate(new Asset("asset5", "black", 15, "Adrian", 700));
+    registry.tryCreate(new Asset("asset6", "white", 15, "Michel", 700));
   }
 
   /**
