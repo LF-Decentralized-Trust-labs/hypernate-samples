@@ -110,24 +110,8 @@ public final class AssetTransfer implements HypernateContract {
    * @return the asset found on the ledger if there was one
    */
   @Transaction(intent = Transaction.TYPE.EVALUATE)
-  public Asset ReadAsset(final Context ctx, final String assetID) {
-    ChaincodeStub stub = ctx.getStub();
-    String assetJSON =
-        new String(
-            stub.getState(
-                stub.createCompositeKey(Asset.class.getName().toUpperCase(), assetID).toString()),
-            UTF_8);
-    if (assetJSON.isEmpty()) {
-      String errorMessage = String.format("Asset %s does not exist", assetID);
-      System.out.println(errorMessage);
-      throw new ChaincodeException(errorMessage, AssetTransferErrors.ASSET_NOT_FOUND.toString());
-    }
-
-    try {
-      return mapper.readValue(assetJSON, Asset.class);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+  public Asset ReadAsset(final HypernateContext ctx, final String assetID) {
+    return ctx.getRegistry().mustRead(Asset.class, assetID);
   }
 
   /**
