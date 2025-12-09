@@ -127,19 +127,22 @@ public final class AssetTransfer implements HypernateContract {
    */
   @Transaction(intent = Transaction.TYPE.SUBMIT)
   public Asset UpdateAsset(
-      final Context ctx,
+      final HypernateContext ctx,
       final String assetID,
       final String color,
       final int size,
       final String owner,
       final int appraisedValue) {
-    if (!AssetExists(ctx, assetID)) {
-      String errorMessage = String.format("Asset %s does not exist", assetID);
-      System.out.println(errorMessage);
-      throw new ChaincodeException(errorMessage, AssetTransferErrors.ASSET_NOT_FOUND.toString());
-    }
-
-    return putAsset(ctx, new Asset(assetID, color, size, owner, appraisedValue));
+    var asset =
+        Asset.builder()
+            .assetID(assetID)
+            .color(color)
+            .size(size)
+            .owner(owner)
+            .appraisedValue(appraisedValue)
+            .build();
+    ctx.getRegistry().mustUpdate(asset);
+    return asset;
   }
 
   /**
