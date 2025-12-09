@@ -12,6 +12,7 @@ repositories { mavenCentral() }
 
 dependencies {
   implementation(libs.fabric.chaincode.shim)
+  implementation(libs.hypernate)
   implementation(libs.jackson.databind)
   implementation(libs.slf4j.api)
 

@@ -1,6 +1,7 @@
 [versions]
 assertj = "4.0.0-M1"
 fabric = "2.5.+"
+hypernate = "0.1.0"
 jackson = "2.20.1"
 junit = "5.12.1"
 junit-platform = "6.1.0-M1"
@@ -13,6 +14,7 @@ spotless = "8.1.0"
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 fabric-chaincode-shim = { module = "org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim", version.ref = "fabric" }
+hypernate = { module = "eu.bp99:hypernate", version.ref = "hypernate" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
