@@ -1,23 +1,17 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.samples.assettransferdemo;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.contract.HypernateContract;
-import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.annotation.Contact;
 import org.hyperledger.fabric.contract.annotation.Contract;
 import org.hyperledger.fabric.contract.annotation.Default;
 import org.hyperledger.fabric.contract.annotation.Info;
 import org.hyperledger.fabric.contract.annotation.License;
 import org.hyperledger.fabric.contract.annotation.Transaction;
-import org.hyperledger.fabric.shim.ChaincodeException;
-import org.hyperledger.fabric.shim.ChaincodeStub;
 
 @Contract(
     name = "basic",
@@ -86,22 +80,6 @@ public final class AssetTransfer implements HypernateContract {
     return asset;
   }
 
-  private Asset putAsset(final Context ctx, final Asset asset) {
-    ChaincodeStub stub = ctx.getStub();
-    String sortedJson = null;
-    try {
-      sortedJson = mapper.writeValueAsString(asset);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-    stub.putState(
-        stub.createCompositeKey(asset.getClass().getName().toUpperCase(), asset.getAssetID())
-            .toString(),
-        sortedJson.getBytes(UTF_8));
-
-    return asset;
-  }
-
   /**
    * Retrieves an asset with the specified ID from the ledger.
    *
@@ -152,18 +130,9 @@ public final class AssetTransfer implements HypernateContract {
    * @param assetID the ID of the asset being deleted
    */
   @Transaction(intent = Transaction.TYPE.SUBMIT)
-  public void DeleteAsset(final Context ctx, final String assetID) {
-    if (!AssetExists(ctx, assetID)) {
-      String errorMessage = String.format("Asset %s does not exist", assetID);
-      System.out.println(errorMessage);
-      throw new ChaincodeException(errorMessage, AssetTransferErrors.ASSET_NOT_FOUND.toString());
-    }
-
-    ctx.getStub()
-        .delState(
-            ctx.getStub()
-                .createCompositeKey(Asset.class.getName().toUpperCase(), assetID)
-                .toString());
+  public void DeleteAsset(final HypernateContext ctx, final String assetID) {
+    var asset = Asset.builder().assetID(assetID).build();
+    ctx.getRegistry().mustDelete(asset);
   }
 
   /**
@@ -174,15 +143,8 @@ public final class AssetTransfer implements HypernateContract {
    * @return boolean indicating the existence of the asset
    */
   @Transaction(intent = Transaction.TYPE.EVALUATE)
-  public boolean AssetExists(final Context ctx, final String assetID) {
-    ChaincodeStub stub = ctx.getStub();
-    String assetJSON =
-        new String(
-            stub.getState(
-                stub.createCompositeKey(Asset.class.getName().toUpperCase(), assetID).toString()),
-            UTF_8);
-
-    return (!assetJSON.isEmpty());
+  public boolean AssetExists(final HypernateContext ctx, final String assetID) {
+    return ctx.getRegistry().tryRead(Asset.class, assetID) != null;
   }
 
   /**
@@ -194,36 +156,15 @@ public final class AssetTransfer implements HypernateContract {
    * @return the old owner
    */
   @Transaction(intent = Transaction.TYPE.SUBMIT)
-  public String TransferAsset(final Context ctx, final String assetID, final String newOwner) {
-    ChaincodeStub stub = ctx.getStub();
-    String assetJSON =
-        new String(
-            stub.getState(
-                stub.createCompositeKey(Asset.class.getName().toUpperCase(), assetID).toString()),
-            UTF_8);
+  public String TransferAsset(
+      final HypernateContext ctx, final String assetID, final String newOwner) {
+    var registry = ctx.getRegistry();
+    Asset oldAsset;
+    oldAsset = registry.mustRead(Asset.class, assetID);
 
-    if (assetJSON.isEmpty()) {
-      String errorMessage = String.format("Asset %s does not exist", assetID);
-      System.out.println(errorMessage);
-      throw new ChaincodeException(errorMessage, AssetTransferErrors.ASSET_NOT_FOUND.toString());
-    }
+    Asset updatedAsset = oldAsset.withOwner(newOwner);
+    registry.mustUpdate(updatedAsset);
 
-    Asset asset = null;
-    try {
-      asset = mapper.readValue(assetJSON, Asset.class);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-
-    putAsset(
-        ctx,
-        new Asset(
-            asset.getAssetID(),
-            asset.getColor(),
-            asset.getSize(),
-            newOwner,
-            asset.getAppraisedValue()));
-
-    return asset.getOwner();
+    return oldAsset.getOwner();
   }
 }

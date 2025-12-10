@@ -5,6 +5,7 @@ import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import lombok.Builder;
 import lombok.Value;
+import lombok.With;
 import lombok.experimental.FieldNameConstants;
 import lombok.extern.jackson.Jacksonized;
 import org.hyperledger.fabric.contract.annotation.DataType;
@@ -16,6 +17,7 @@ import org.hyperledger.fabric.contract.annotation.Property;
 @Jacksonized
 @PrimaryKey(@AttributeInfo(name = Asset.Fields.assetID))
 @Value
+@With
 public class Asset {
 
   @Property String assetID;
