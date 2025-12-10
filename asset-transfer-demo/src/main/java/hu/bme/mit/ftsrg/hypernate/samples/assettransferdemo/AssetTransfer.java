@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.contract.HypernateContract;
+import hu.bme.mit.ftsrg.hypernate.middleware.MiddlewareInfo;
 import org.hyperledger.fabric.contract.annotation.Contact;
 import org.hyperledger.fabric.contract.annotation.Contract;
 import org.hyperledger.fabric.contract.annotation.Default;
@@ -31,6 +32,7 @@ import org.hyperledger.fabric.shim.ChaincodeException;
                     name = "Adrian Transfer",
                     url = "https://hyperledger.example.com")))
 @Default
+@MiddlewareInfo({ThrottlingMiddleware.class, LoggingMiddleware.class})
 public final class AssetTransfer implements HypernateContract {
 
   private final ObjectMapper mapper =

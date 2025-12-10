@@ -66,6 +66,7 @@ final class AssetTransferTest {
 
     // Act
     contract.InitLedger(ctx);
+    contract.afterTransaction(ctx, null);
 
     // Assert
     var stateAssertions = testing.assertThat(stub).state;
@@ -122,6 +123,7 @@ final class AssetTransferTest {
               asset1.getSize(),
               asset1.getOwner(),
               asset1.getAppraisedValue());
+      contract.afterTransaction(ctx, returned);
 
       // Assert
       assertThat(returned).isEqualTo(asset1);
@@ -144,6 +146,7 @@ final class AssetTransferTest {
 
       // Act
       final Asset returned = contract.ReadAsset(ctx, asset1.getAssetID());
+      contract.afterTransaction(ctx, returned);
 
       // Assert
       assertThat(returned).isEqualTo(asset1);
@@ -196,6 +199,7 @@ final class AssetTransferTest {
               asset1Updated.getSize(),
               asset1Updated.getOwner(),
               asset1Updated.getAppraisedValue());
+      contract.afterTransaction(ctx, returned);
 
       // Assert
       assertThat(returned).isEqualTo(asset1Updated);
@@ -280,6 +284,7 @@ final class AssetTransferTest {
 
       // Act
       contract.DeleteAsset(ctx, asset1.getAssetID());
+      contract.afterTransaction(ctx, null);
 
       // Assert
       testing.assertThat(stub).state.deletedNTimes(asset1, 1);
@@ -306,6 +311,7 @@ final class AssetTransferTest {
 
       // Act
       String returned = contract.TransferAsset(ctx, asset1.getAssetID(), asset1Updated.getOwner());
+      contract.afterTransaction(ctx, returned);
 
       // Assert
       assertThat(returned).isEqualTo(asset1.getOwner());
