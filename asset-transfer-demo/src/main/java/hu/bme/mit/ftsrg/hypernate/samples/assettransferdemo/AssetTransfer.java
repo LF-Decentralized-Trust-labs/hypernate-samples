@@ -12,6 +12,7 @@ import org.hyperledger.fabric.contract.annotation.Default;
 import org.hyperledger.fabric.contract.annotation.Info;
 import org.hyperledger.fabric.contract.annotation.License;
 import org.hyperledger.fabric.contract.annotation.Transaction;
+import org.hyperledger.fabric.shim.ChaincodeException;
 
 @Contract(
     name = "basic",
@@ -37,7 +38,8 @@ public final class AssetTransfer implements HypernateContract {
 
   private enum AssetTransferErrors {
     ASSET_NOT_FOUND,
-    ASSET_ALREADY_EXISTS
+    ASSET_ALREADY_EXISTS,
+    ASSET_VALUE_TOO_LOW,
   }
 
   /**
@@ -164,6 +166,10 @@ public final class AssetTransfer implements HypernateContract {
 
     Asset updatedAsset = oldAsset.withOwner(newOwner);
     registry.mustUpdate(updatedAsset);
+
+    if (oldAsset.getAppraisedValue() < 100)
+      throw new ChaincodeException(
+          "Asset %s's value is too low: %d".formatted(assetID, oldAsset.getAppraisedValue()));
 
     return oldAsset.getOwner();
   }

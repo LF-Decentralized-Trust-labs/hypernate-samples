@@ -342,5 +342,30 @@ final class AssetTransferTest {
           .updatedNTimes(asset1, 0)
           .updatedNTimes(0);
     }
+
+    @Test
+    void should_throw_when_asset_value_too_low() {
+      // Arrange
+      var asset1 = new Asset("asset1", "blue", 5, "Tomoko", 50);
+      var asset1Updated = new Asset("asset1", "blue", 5, "Dr Evil", 50);
+      testing
+          .arrange(stub)
+          .setCompositeKey(asset1, asset1.getClass().getName().toUpperCase(), asset1.getAssetID())
+          .setCompositeKey(
+              asset1Updated,
+              asset1Updated.getClass().getName().toUpperCase(),
+              asset1Updated.getAssetID())
+          .byteStates
+          .set(asset1);
+
+      // Act
+      Throwable thrown =
+          catchThrowable(
+              () -> contract.TransferAsset(ctx, asset1.getAssetID(), asset1Updated.getOwner()));
+
+      // Assert
+      assertThat(thrown).isInstanceOf(RuntimeException.class);
+      testing.assertThat(stub).state.updatedNTimes(asset1, 0).updatedNTimes(0);
+    }
   }
 }
